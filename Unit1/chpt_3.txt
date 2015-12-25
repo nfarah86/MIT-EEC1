@@ -1,0 +1,257 @@
+
+pages to review: 25, 26-28 3.15 ex
+
+Goal of chpt: understannd oop by working through the mechanism by which an interpreter evaluates a computer program
+
+Interpeter: Computer programs are understood and executed by a computer program called interpeter.
+	The rules defining the meaning or semantics of a programming language are typically short and compact; and the interpreter basically encodes these rules and applies them to any legal expression in the language. 
+
+	The interpreter defines the semantics of the language by capturing the rules governing the value or behavior of program primitives, and of what it means to combine the primitives in various ways. 
+
+	Interpreter is made of 4 pieces:
+		1)reader or tokenizer- takes as input a string of characters and divides them into tokens, which are numbers, words, and special characters
+		2)Parser- takes as input the string of tokens and understands them as constructs in the programming language, such as while loops, procedure def, or return statements.
+		3)Evaluator (aka interpreter) - determines the value and effects of the program that you ask it to interpret. 
+		4)Printer - takes the value returned by the evaluator and prints it out for the user to see.  
+
+
+3.1 - Primitives, Composition, Abstraction, and Patterns
+
+	•DATA: 
+		-integers, floating point numbers, and strings; all this can be combined INTO data structures. 
+		- Data structure: think of a collection of data as if they were one thing
+	•Procedure:
+		-built-in numeric operations and basic list operations.  We can combine these using the facilities of the language, such as 'if' and 'while', or using function composition (f(g(x))) . 
+	•OBJECTS:
+		-oop provides a number of mehtods and abstraction and pattern capture in both data and procedures. They provide strategies for jointly abstracting a data representation and the procedures that work on it.  Inheritance and polymorphism
+
+	3.2  Expression and Assignment
+		-To represent data in a computer, we have to encode it as sequences of binary digits.
+
+		-The memory of the computer is divided into words that hods 32 or 64 bits; the word can be used to store numbers, characters or a pointer (the address of) another memory location. 
+
+	3.2.1  Simple Expressions
+
+		-We need to evaluate expressions.  An expressions is a sequence of 'tokens' that represent the application of operators: data elements.  We can evaluate the primitive expressions (numbers) and hen use standard rulest o combine their values to get a new value recursivley. 
+
+		-6 and -3.7 are examples of numeric constans ie primitive expressions.   Floating point number are used to represent non-integer values, but they are different from real numbers.   There are infinitely many real numbers within a finite interval, but only a finitely many floating point numbers exist at all because they must be represetnable in a fixed number of bits.  The laws of arithmetic are violated in floating point arithmetic because the results of any given sub-computation may not be representable in the given number of bits. 
+
+
+		-python interpreter: 
+			-reads and converts typed info to tokens
+			-parses tokens into data structures representing the syntax of the expression
+			-evaluates the parsed expression using an interpreter
+			-prints out resulting value
+
+			-The interpreter proceeds by applying the operations in precedence order -> eval. sub expressions untils 1 value results. 
+
+	3.2.2 Varaibles
+		-Interpreter keeps track of which variables are bound to what vaules in  bidning enviornments.  
+			-An env. specifies a mapping between variable names and values. 
+				-exp: b = 3
+				b=3 is binding
+				b = varaiable
+				3 = value
+
+				<var> = <expr>
+			-When python shell starts, you immediatley start interacting with the local bidning env.
+
+			in Shell: a = 3 we added the binding to the local env (shell)
+
+			If the interpeter comes to a varaible, it looks up the variable in the env.  If the env. contains the bidning for the variable, then the assoc. value is returned.  IF not, error. 
+
+	3.3 Structured data
+		a = [2, 1, -3]
+			-A binding env. associates a name with a single fixed-size data item.   If we want to assoicate a name with a complex structure, we assoicate the name directly with a pointer to the structure.  
+			'a' is being bound to a 'pointer' to the list 
+
+			a ====> [2,1,-3]
+
+	3.3.1 List mutation and shared structure
+
+		• a[1] = -3
+			->The left hand side of th=e expr. evaluates to a pointer to a specific location in memory ( just as a's value is a pointer to a location in memory); then the assignemnt statement changes the value stored there by inserting the value of the right hand side of the expression.  
+
+			a = [1,2,3]
+			b = a
+
+			b refers to the SAME list as a (in memory, both a and b point to 1 list.).  This is aliasing. 
+
+			changing 'b' changes 'a' - becareful if you don't want to modify the list. 
+
+			If you want to COPY the list (ie doesn't point to a's list) do it this way:
+
+			c = list(a)
+ 			c = a[:]
+
+ 			a and b==> [1,2,3]
+ 			c = [1,2,3]
+
+ 			c has ITS OWN COPY that doesn't point to a's list. 
+ 			This also means changing c DOESN'T CHANGE a or b. However changing a or b modifies the list for both and a and b. 
+
+ 			Inheritance: if you have 
+ 			d = [1,[c], [a]]
+ 			and if you need to copy deep structures (that is copy not only of the top level list structure, but structures of any lists that list contains, and the lists those list contain etc .. . ) you will need to use Python copy.decopy procedure. 
+
+ 	3.3.2 Tuples and Srings
+
+ 		-Tuple: not mutable
+ 		- a = 1,2,3
+ 		-strings are a type of tuple
+
+ 		structured assignments:
+ 		a, b, c = 1, 2, 3
+ 		[a,b,c] = [1,2,3]
+ 			both of these will unpack as:
+ 			>>a
+ 			1
+ 			>>b
+ 			2
+ 			>>c
+ 			3
+
+ 	3.4 Procedures
+ 		-are computer program constructs that let us capture common patterns of computation by:
+
+ 		def square(x):
+ 			return x *x 
+
+ 		square(2)
+
+ 	3.4.1 Definition
+ 		-A procedure def has the abstract form of:
+ 			def name (parameters)
+ 				statement1
+
+ 				statementk
+ 		name = name for the procedure
+ 		statement 1, k = body
+
+
+ 		-When we evaluate a procedure def in an env, python does 2 things:
+ 			a) make a procedure obj that contains the formal params, the body of procedure, and a pointer to env.
+ 			b) binds name to have this procedure as its value
+
+
+ 			def square(x):
+ 				return x * x
+
+ 	3.4.3 non-local frames
+
+ 	def biz(a):
+		return a + b
+
+	>>> b = 6
+	>>> biz(2)
+
+		-> b= 6 and biz are part of env1 and biz(2) is env2;
+
+
+		So, in our case, we will evaluate the expression a + b in environment E2. We start by evaluating a and finding value 2 in E2. Then, we evaluate b and cannot find it in E2...but we don’t panic! We follow the parent pointer to E1 and try again. We find a binding for b in E1 and get the value 6.
+		
+		So, the value of a + b in E2 is 8. 
+
+		env in python:
+			-python has __builtin__ ie sum and list; it is the parent of all module envs
+			-each separate file that contains python code is called a module and establishes its own env whose parent is __builtin__
+			-procedures are defined as top-level -->aka not nested in the def of another procedure.  
+			-bindings are also created when you evaluate import statements:
+				-- import math
+					-> the file associated with math module is evaluated and the name math is bound, in the current env., to the math module, which is an env. 
+
+					-> if you want to refer to names in that module you have to qualify them as math.sqrt
+						-> the eval. of the expression first evaluates math, which returns an env.  We can then evaluate sqrt with respect to the env, thus returning a pointer to the procedure stored there. 
+
+				-> from math import sqrt
+					=> math file is evaluated and the name sqrt is bound, in the current env, to whatever the name sqrt is bound in the math module.  But math is not bound to anything, and you cannot access any other procedures in the math module, unless imported explicitly. 
+	3.4.5 non-local references in procedures
+
+		->When a name is not bound in the local env is referenced, then it is looked up in the chain of parent env. 
+
+		a=2
+		def b():
+			return a
+
+		When a name is inside a procedure, a new binding is created for it in the env associated with the current call of that procedure. 
+
+		a=2
+		def b():
+			a=3
+			c=4
+			return a + c
+
+		Both assignm. cause new bindings to be made in the local env, and it is those bindings that are used to supply values in the return expression.  It will not change a in the global env. 
+
+		a=3
+		def b():
+			a = a + 1
+			print a
+
+		-<error is generated with this function. This is because Python adds a binding when it sees procedure definition.  It sees 'a' occurs on the left hand side.  Thus, at the very begininning it puts a new entry for 'a' in the local env -> BUT WITHOUT ANY VALUE BOUND TO IT.   
+
+		When Python evaluates: a + 1 -> 'a' on the right hand side has no value in the local env, so an error is brought up
+
+
+		a=3
+		def b():
+			global a
+			a = a + 1
+			print a
+
+			-> The new global statement asks that a new binding for 'a' NOT BE MADE in the procedure-call env. All references to 'a' are to the bindings in the module env, so the procedure NOW actually changes 'a'.
+
+
+		def outer():
+			def inner():
+				a = a + 1
+			a = 0
+			inner()
+
+			-> This is an error because a local binding env is amde for inner() with no value.  Thus a + 1 will bring an error. There is no way for inner() to modify outer(). 
+
+	Procedures as first-class objects:
+		-Why are procedures first class: they can be treated the same ways as numbers: pass as variables, returned, and etc . . .
+
+		example:
+			>>> f = lambda x: x*x
+			>>> f
+				<function <lambda> at 0x4ecf0>
+			>>> f(4)
+				16
+
+			>>> g = lambda x,y : x * y
+			>>> g(3, 4)
+				12
+
+		>>> procs = [lambda x: x, lambda x: x + 1, lambda 		x: x + 2]
+		>>> procs[0]
+			<function <lambda> at 0x83d70>
+		>>> procs[1](6)
+			7
+
+ENVIORNMENTS-  GO OVER
+
+
+	RETURN procedures as values:
+		
+		def doTwiceMaker(f):
+			def twoF(x):
+				return f(f(x))
+			return twoF
+
+		can also be written as:
+
+		def doTwiceMAKER(f):
+			return lambda x: f(f(x))
+
+3.5 Object-oriented programming
+
+	-
+
+	
+
+
+
+
+
